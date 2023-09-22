@@ -13,7 +13,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
+        (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', 'launch.py'))),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -24,10 +24,12 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'talker = motion_planning.turtles_p1copy:main',
-            'turtle = motion_planning.turtles_p1:main',
-            'grid = motion_planning.turtles_p2:main',
-
+            'grid = motion_planning.grid_publisher:main',
+            'plot = motion_planning.performance_plot:main',
+            'bfs = motion_planning.bfs:main',
+            'dfs = motion_planning.dfs:main',
+            'dijkstra = motion_planning.dijkstra:main',
+            'random = motion_planning.random:main',
         ],
     },
 

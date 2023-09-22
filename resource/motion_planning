@@ -1,0 +1,25 @@
+Here I have created six nodes communicating with each other to plot a performance graph of search algorithms.
+I have selected bfs, dfs and dijkstra algorithms for performance comparison. 
+1) publishing occupancy grid:
+# This node publishes the node with random obstacles in the 128 * 128 grid. The obstacle percentage can be given as a parameter through copmmand line.
+# Default value for obstacle percentage is 30. 
+2) bfs algorithm:
+# This node subscribes to "custom_occupancy_grid" topic to get the grid occupancy status and uses the data to calculate the path from Northwest
+# corner to southeast corner. Also it publishes the path on as a points and connecting lines on the "bfs_topic" and publishes the no of iterations 
+# on the "bfs_iterations" topic. 
+3) dfs algorithm:
+# This node subscribes to "custom_occupancy_grid" topic to get the grid occupancy status and uses the data to calculate the path from Northwest
+# corner to southeast corner. Also it publishes the path on as a points and connecting lines on the "dfs_topic" and publishes the no of iterations 
+# on the "dfs_iterations" topic.  
+4) Dijkstra algorithm:
+# This node subscribes to "custom_occupancy_grid" topic to get the grid occupancy status and uses the data to calculate the path from Northwest
+# corner to southeast corner. Also it publishes the path on as a points and connecting lines on the "dijkstra_topic" and publishes the no of iterations 
+# on the "dijkstra_iterations" topic. 
+5) Random algorithm:
+# This node subscribes to "custom_occupancy_grid" topic to get the grid occupancy status and uses the data to calculate the path from Northwest
+# corner to southeast corner. Also it publishes the path on as a points and connecting lines on the "random_topic" and publishes the no of iterations 
+# on the "random_iterations" topic. 
+6) Performance plot 
+# This node have subscriber for all search algorithms to get the no of iteration they took for calculating the path.
+# It plots the graph of obstacle percentage vs no of iterations done by respective search algorithms ie bfs, dfs and dijkstra, when 10 entries are recieved.
+
