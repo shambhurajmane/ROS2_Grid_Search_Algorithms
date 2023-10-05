@@ -16,6 +16,12 @@
 
 <img src="data/rviz_visualization.png" alt="Logo" width="1000" height="600">
 
+breadth first search Algorithm             |  Dijkstra's Algorithm  
+:-------------------------:|:-------------------------:
+<img src="data/bfs.gif" alt="Logo" width="450" height="300"> |  <img src="data/dij.gif" alt="Logo" width="450" height="300">
+
+
+
 * Instantiated a grid world with a configurable density of obstacles using tetrominoes as depicted in Figure.
 * Implemented three forward search planning algorithms: depth first search, breadth first search, and Dijkstra’s.
 * Created a random planner that simply moves to a random neighboring cell at each iteration.
