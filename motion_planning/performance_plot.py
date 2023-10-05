@@ -40,7 +40,7 @@ class GridPublisher(Node):
         percentage=message.data
         
         self.per_data.append(int(percentage))
-        print(self.per_data)
+        
 
 
     def bfs_callback(self, message):

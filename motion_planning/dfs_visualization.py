@@ -34,6 +34,7 @@ class DFSPublisher(Node):
 
         self.dfs_publisher = self.create_publisher(Marker, 'dfs_topic', 10)
         self.iteration_publisher = self.create_publisher(Int32MultiArray, 'dfs_iterations', 10)
+        self.grid_publisher = self.create_publisher(OccupancyGrid, 'custom_occupancy_grid', 10)
         
 
         
@@ -94,6 +95,8 @@ class DFSPublisher(Node):
                 if self.is_valid(new_x, new_y) and (new_x, new_y) not in visited:
                     if self.grid[new_x][new_y]==0:
                         visited.append((new_x, new_y))
+                        self.occupancy_array[(new_x*self.width)+new_y]=50
+                        self.grid_pub()
                         parent[(new_x, new_y)] = (x, y)
                         stack.append((new_x, new_y))
         #print("path not found")
@@ -158,6 +161,25 @@ class DFSPublisher(Node):
         self.dfs_publisher.publish(line_strip)
         self.dfs_publisher.publish(points)
 
+
+    def grid_pub(self):
+        message=OccupancyGrid()
+        
+        message.header.stamp = DFSPublisher.get_clock(self).now().to_msg()
+        message.header.frame_id = "map_frame"
+        message.info.resolution = 1.0
+        message.info.width = self.width
+        message.info.height = self.width
+        message.info.origin.position.x = -5.0
+        message.info.origin.position.y = -5.0
+        message.info.origin.position.z = 0.0
+        message.info.origin.orientation.x = 0.0
+        message.info.origin.orientation.y = 0.0
+        message.info.origin.orientation.z = 0.0
+        message.info.origin.orientation.w = 1.0
+        message.data = self.occupancy_array
+
+        self.grid_publisher.publish(message)
 
 
 def main(args=None):

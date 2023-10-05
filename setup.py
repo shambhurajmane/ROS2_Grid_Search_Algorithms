@@ -30,6 +30,9 @@ setup(
             'dfs = motion_planning.dfs:main',
             'dijkstra = motion_planning.dijkstra:main',
             'random = motion_planning.random:main',
+            'viz_bfs = motion_planning.bfs_visualization:main',
+            'viz_dfs = motion_planning.dfs_visualization:main',
+            'viz_dijkstra = motion_planning.dijkstra_visualization:main',
         ],
     },
 
