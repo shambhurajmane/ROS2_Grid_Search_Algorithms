@@ -6,10 +6,11 @@
 import rclpy
 from rclpy.node import Node
 from nav_msgs.msg import OccupancyGrid
-from std_msgs.msg import Int32MultiArray
+from std_msgs.msg import Float32MultiArray
 from visualization_msgs.msg import Marker
 import geometry_msgs.msg 
 import heapq
+import time
 
 
 class DJ_publisher(Node):
@@ -29,10 +30,19 @@ class DJ_publisher(Node):
         self.subscription = self.create_subscription(OccupancyGrid, 'custom_occupancy_grid', self.grid_callback, 10) 
 
         self.dj_publisher = self.create_publisher(Marker, 'dijkstra_topic', 10)
-        self.iteration_publisher = self.create_publisher(Int32MultiArray, 'dijkstra_iterations', 10)
+        self.iteration_publisher = self.create_publisher(Float32MultiArray, 'dijkstra_iterations', 10)
                  
     
     def grid_callback(self,grid_message):
+        self.grid=[]
+        self.start_x, self.start_y = 0,0
+        self.dest_x, self.dest_y = 127, 127
+        self.dx = [-1, 1, 0, 0]
+        self.dy = [0, 0, -1, 1]
+        self.visited=[]
+        self.width=0
+        self.visited_iterations=0
+        self.path_length=0
         occupancy_array= grid_message.data
         self.width=grid_message.info.width
         pos=[]
@@ -46,7 +56,14 @@ class DJ_publisher(Node):
                 pos=[]
                 pos.append(occupancy_array[i])
         self.grid.append(pos) 
+        
+        start = time.time()
         self.dijkstra()
+        end = time.time()
+        time_taken = round((end-start), 4)
+        array=Float32MultiArray()
+        array.data=[self.visited_iterations*1.0,time_taken]
+        self.iteration_publisher.publish(array)
         self.deploy_marker()
         #print(self.grid)
 
@@ -76,7 +93,7 @@ class DJ_publisher(Node):
 
                 path.append((self.start_x, self.start_y))
                 
-                #print("path found and publsihing on topic")
+                # print("path found by dijkstra algorithm with length", len(path))
                 self.visited=path
                 self.path_length=len(path)
                 return self.visited    
@@ -94,7 +111,7 @@ class DJ_publisher(Node):
                             parent[(new_x, new_y)] = (x, y)
                             heapq.heappush(heap, (new_dist, (new_x, new_y)))
 
-        #print("path not found")
+        # print("path not found by dijsktra algorithm")
         return self.visited
     
     
@@ -103,12 +120,12 @@ class DJ_publisher(Node):
         
         line_strip=Marker()
         points=Marker()
-        array=Int32MultiArray()
+        array=Float32MultiArray()
         #print(self.final_path)
         
-        line_strip.header.frame_id = "/map_frame"
+        line_strip.header.frame_id = "/map"
         line_strip.header.stamp = DJ_publisher.get_clock(self).now().to_msg()
-        points.header.frame_id = "/map_frame"
+        points.header.frame_id = "/map"
         points.header.stamp = DJ_publisher.get_clock(self).now().to_msg()
 
         line_strip.ns = points.ns ="lines"
@@ -151,15 +168,14 @@ class DJ_publisher(Node):
             line_strip.points.append(geometry_msgs.msg.Point(x=self.visited[i][1]*1.0, y=self.visited[i][0]*1.0, z=0.0))
         #print(line_strip.points)
 
-        array.data=[self.visited_iterations,self.path_length]
-        self.iteration_publisher.publish(array)
+     
         self.dj_publisher.publish(line_strip)
         self.dj_publisher.publish(points)
 
 def main(args=None):
     rclpy.init(args=args)
     dj_publisher = DJ_publisher()
-    rclpy.spin_once(dj_publisher)
+    rclpy.spin(dj_publisher)
     dj_publisher.destroy_node()
     rclpy.shutdown()
 

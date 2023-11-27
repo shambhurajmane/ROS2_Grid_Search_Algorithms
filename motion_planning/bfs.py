@@ -7,9 +7,10 @@ import rclpy
 from rclpy.node import Node
 from nav_msgs.msg import OccupancyGrid
 from collections import deque
-from std_msgs.msg import Int32MultiArray
+from std_msgs.msg import Float32MultiArray
 from visualization_msgs.msg import Marker
 import geometry_msgs.msg 
+import time
 
 
 
@@ -33,7 +34,7 @@ class BFSPublisher(Node):
         
 
         self.bfs_publisher = self.create_publisher(Marker, 'bfs_topic', 10)
-        self.iteration_publisher = self.create_publisher(Int32MultiArray, 'bfs_iterations', 10)
+        self.iteration_publisher = self.create_publisher(Float32MultiArray, 'bfs_iterations', 10)
         
         
 
@@ -41,6 +42,14 @@ class BFSPublisher(Node):
            
     
     def grid_callback(self,grid_message):
+        self.grid=[]
+        self.start_x, self.start_y = 0,0
+        self.dest_x, self.dest_y = 127, 127
+        self.dx = [-1, 1, 0, 0]
+        self.dy = [0, 0, -1, 1]
+        self.final_path=[]
+        self.visited_iterations=0
+        self.path_length=0
         occupancy_array= grid_message.data
         width=grid_message.info.width
         pos=[]
@@ -54,7 +63,14 @@ class BFSPublisher(Node):
                 pos=[]
                 pos.append(occupancy_array[i])
         self.grid.append(pos) 
+        
+        start = time.time()
         self.bfs()
+        end = time.time()
+        time_taken = round((end-start), 4)
+        array=Float32MultiArray()
+        array.data=[self.visited_iterations * 1.0,time_taken]
+        self.iteration_publisher.publish(array)
         self.deploy_marker()
         #print(self.grid)
 
@@ -83,7 +99,7 @@ class BFSPublisher(Node):
 
                 path.append((self.start_x, self.start_y))
                 
-                #print("path found and publsihing on topic")
+                # print("path found by bfs algorithm with length", len(path))
                 self.final_path=path
                 self.path_length=len(path)
                 return self.final_path    
@@ -97,7 +113,7 @@ class BFSPublisher(Node):
                         visited.append((new_x, new_y))
                         parent[(new_x, new_y)] = (x, y)
                         queue.append((new_x, new_y))
-        #print("path not found")
+        # print("path not found by bfs algorithm")
         return self.final_path
     
     
@@ -106,12 +122,12 @@ class BFSPublisher(Node):
         
         line_strip=Marker()
         points=Marker()
-        array=Int32MultiArray()
+        array=Float32MultiArray()
         #print(self.final_path)
         
-        line_strip.header.frame_id = "/map_frame"
+        line_strip.header.frame_id = "/map"
         line_strip.header.stamp = BFSPublisher.get_clock(self).now().to_msg()
-        points.header.frame_id = "/map_frame"
+        points.header.frame_id = "/map"
         points.header.stamp = BFSPublisher.get_clock(self).now().to_msg()
 
         line_strip.ns = points.ns ="lines"
@@ -153,15 +169,14 @@ class BFSPublisher(Node):
             line_strip.points.append(geometry_msgs.msg.Point(x=self.final_path[i][1]*1.0, y=self.final_path[i][0]*1.0, z=0.0))
         
 
-        array.data=[self.visited_iterations,self.path_length]
-        self.iteration_publisher.publish(array)
+   
         self.bfs_publisher.publish(line_strip)
         self.bfs_publisher.publish(points)
 
 def main(args=None):
     rclpy.init(args=args)
     bfs_publisher = BFSPublisher()
-    rclpy.spin_once(bfs_publisher)
+    rclpy.spin(bfs_publisher)
     bfs_publisher.destroy_node()
     rclpy.shutdown()
 

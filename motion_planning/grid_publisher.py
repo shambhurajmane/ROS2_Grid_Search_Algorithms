@@ -74,7 +74,7 @@ class GridPublisher(Node):
         per=Float32()
 
         message.header.stamp = GridPublisher.get_clock(self).now().to_msg()
-        message.header.frame_id = "map_frame"
+        message.header.frame_id = "map"
         message.info.resolution = 1.0
         message.info.width = self.width
         message.info.height = self.height

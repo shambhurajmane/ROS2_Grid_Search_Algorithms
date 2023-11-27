@@ -6,7 +6,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32
-from std_msgs.msg import Int32MultiArray
+from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Float32
 import matplotlib.pyplot as plt
 
@@ -21,18 +21,17 @@ class GridPublisher(Node):
         self.dfs_data=[]
         self.random_data=[]
         self.dijkstra_data=[]
-        # x-axis label
-        plt.xlabel('Percentage')
-        # frequency label
-        plt.ylabel('No. of iterations')
-        # plot title
-        plt.title('Motion Planning: Flatland assignemnt')
+        self.bfs_time=[]
+        self.dfs_time=[]
+        self.random_time=[]
+        self.dijkstra_time=[]
+       
 
-        self.subscription = self.create_subscription(Int32MultiArray, 'bfs_iterations', self.bfs_callback, 10)
-        self.subscription = self.create_subscription(Int32MultiArray, 'dfs_iterations', self.dfs_callback, 10)
-        self.subscription = self.create_subscription(Int32MultiArray, 'dijkstra_iterations', self.dijsktra_callback, 10) 
+        self.subscription = self.create_subscription(Float32MultiArray, 'bfs_iterations', self.bfs_callback, 10)
+        self.subscription = self.create_subscription(Float32MultiArray, 'dfs_iterations', self.dfs_callback, 10)
+        self.subscription = self.create_subscription(Float32MultiArray, 'dijkstra_iterations', self.dijsktra_callback, 10) 
         self.subscription = self.create_subscription(Float32, 'obstacle_percentage', self.percent_callback, 10) 
-        self.subscription = self.create_subscription(Int32MultiArray, 'random_iterations', self.random_callback, 10) 
+        self.subscription = self.create_subscription(Float32MultiArray, 'random_iterations', self.random_callback, 10) 
      
         
                  
@@ -44,57 +43,73 @@ class GridPublisher(Node):
 
 
     def bfs_callback(self, message):
-        value=message.data[0]
-        self.bfs_data.append(value)
-        print("bfs")
-        print(self.bfs_data)
-        
-        if len(self.bfs_data)==len(self.dfs_data)==len(self.dijkstra_data)==len(self.random_data)==6:
-            plt.plot(self.per_data, self.dfs_data, label = "dfs", marker='o', markersize=12)
-            plt.plot(self.per_data, self.bfs_data, label = "bfs", marker='o', markersize=12)
-            plt.plot(self.per_data, self.dijkstra_data, label = "dijkstra", marker='o', markersize=12)
-            plt.plot(self.per_data, self.random_data, label = "random", marker='o', markersize=12)
-            plt.legend()
-            plt.show()
+        value=message.data
+        self.bfs_time.append(value[1])
+        self.bfs_data.append(value[0])
+      
+        # print(self.bfs_data)
+        if len(self.bfs_data)==len(self.dfs_data)==len(self.dijkstra_data)==len(self.random_data)==10:
+            self.plot()
+
 
     def dfs_callback(self, message):
-        value=message.data[0]
-        self.dfs_data.append(value)
-        print("dfs")
-        print(self.dfs_data)
-        if len(self.bfs_data)==len(self.dfs_data)==len(self.dijkstra_data)==len(self.random_data)==6:
-            plt.plot(self.per_data, self.dfs_data, label = "dfs", marker='o', markersize=12)
-            plt.plot(self.per_data, self.bfs_data, label = "bfs", marker='o', markersize=12)
-            plt.plot(self.per_data, self.dijkstra_data, label = "dijkstra", marker='o', markersize=12)
-            plt.plot(self.per_data, self.random_data, label = "random", marker='o', markersize=12)
-            plt.legend()
-            plt.show()
+        value=message.data
+        self.dfs_time.append(value[1])
+        self.dfs_data.append(value[0])
+                             
+        if len(self.bfs_time)==len(self.dfs_time)==len(self.dijkstra_time)==len(self.random_time)==10:
+            self.plot()
+
 
     def dijsktra_callback(self, message):
-        value=message.data[0]
-        self.dijkstra_data.append(value)
-        print("dijkstra")
-        print(self.dijkstra_data)
-        if len(self.bfs_data)==len(self.dfs_data)==len(self.dijkstra_data)==len(self.random_data)==6:
-            plt.plot(self.per_data, self.dfs_data, label = "dfs", marker='o', markersize=12)
-            plt.plot(self.per_data, self.bfs_data, label = "bfs", marker='o', markersize=12)
-            plt.plot(self.per_data, self.dijkstra_data, label = "dijkstra", marker='o', markersize=12)
-            plt.plot(self.per_data, self.random_data, label = "random", marker='o', markersize=12)
-            plt.legend()
-            plt.show()
+        value=message.data
+        self.dijkstra_data.append(value[0])
+        self.dijkstra_time.append(value[1])
+        if len(self.bfs_time)==len(self.dfs_time)==len(self.dijkstra_time)==len(self.random_time)==10:
+            self.plot()
+
 
     def random_callback(self, message):
-        value=message.data[0]
-        self.random_data.append(value)
-        print("random")
-        print(self.random_data)
-        if len(self.bfs_data)==len(self.dfs_data)==len(self.dijkstra_data)==len(self.random_data)==6:
-            plt.plot(self.per_data, self.dfs_data, label = "dfs", marker='o', markersize=12)
-            plt.plot(self.per_data, self.bfs_data, label = "bfs", marker='o', markersize=12)
-            plt.plot(self.per_data, self.dijkstra_data, label = "dijkstra", marker='o', markersize=12)
-            plt.plot(self.per_data, self.random_data, label = "random", marker='o', markersize=12)
-            plt.legend()
-            plt.show()
+        value=message.data
+        self.random_data.append(value[0])
+        self.random_time.append(value[1])
+        # print("random")
+        # print(self.random_time)
+        if len(self.bfs_time)==len(self.dfs_time)==len(self.dijkstra_time)==len(self.random_time)==10:
+            self.plot()
+            
+    def plot(self):     
+        # Create box and whisker plots
+        print("bfs",self.bfs_time, self.bfs_data )
+        print("dfs",self.dfs_time, self.dfs_data )
+        print("dij",self.dijkstra_time, self.dijkstra_data )
+
+        plt.figure(figsize=(20, 15))
+
+        # Time Complexity
+        plt.subplot(1, 2, 1)
+        plt.plot(self.per_data, self.dfs_time, label = "dfs", marker='o', markersize=12)
+        plt.plot(self.per_data, self.bfs_time, label = "bfs", marker='o', markersize=12)
+        plt.plot(self.per_data, self.dijkstra_time, label = "dijkstra", marker='o', markersize=12)
+        # plt.plot(self.per_data, self.random_time, label = "random", marker='o', markersize=12)
+        plt.title('Time Complexity')
+        plt.ylabel('Cases')
+        plt.legend()
+
+        # Space Complexity
+        plt.subplot(1, 2, 2)
+        plt.plot(self.per_data, self.dfs_data, label = "dfs", marker='o', markersize=12)
+        plt.plot(self.per_data, self.bfs_data, label = "bfs", marker='o', markersize=12)
+        plt.plot(self.per_data, self.dijkstra_data, label = "dijkstra", marker='o', markersize=12)
+        # plt.plot(self.per_data, self.random_data, label = "random", marker='o', markersize=12)
+        plt.title('Space Complexity')
+        plt.ylabel('Cases')
+        plt.legend()
+    
+
+        plt.tight_layout()
+        plt.show()
+   
      
 
 def main(args=None):

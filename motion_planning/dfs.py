@@ -8,9 +8,10 @@ from rclpy.node import Node
 from nav_msgs.msg import OccupancyGrid
 
 from collections import deque
-from std_msgs.msg import Int32MultiArray
+from std_msgs.msg import Float32MultiArray
 from visualization_msgs.msg import Marker
 import geometry_msgs.msg 
+import time
 
 
 class DFSPublisher(Node):
@@ -33,13 +34,25 @@ class DFSPublisher(Node):
         self.subscription = self.create_subscription(OccupancyGrid, 'custom_occupancy_grid', self.grid_callback, 10) 
 
         self.dfs_publisher = self.create_publisher(Marker, 'dfs_topic', 10)
-        self.iteration_publisher = self.create_publisher(Int32MultiArray, 'dfs_iterations', 10)
+        self.iteration_publisher = self.create_publisher(Float32MultiArray, 'dfs_iterations', 10)
         
 
         
                  
     
     def grid_callback(self,grid_message):
+        
+                    
+        self.grid=[]
+        self.start_x, self.start_y = 0,0
+        self.dest_x, self.dest_y = 127, 127
+        self.dx = [0, 1, -1, 0]
+        self.dy = [1, 0, 0, 1]
+        self.final_path=[]
+        self.visited_iterations=0
+        self.path_length=0
+        self.occupancy_array=[]
+        self.width=0
         self.occupancy_array= grid_message.data
         self.width=grid_message.info.width
         pos=[]
@@ -53,7 +66,16 @@ class DFSPublisher(Node):
                 pos=[]
                 pos.append(self.occupancy_array[i])
         self.grid.append(pos) 
+        start = time.time()
         self.dfs()
+        end = time.time()
+        time_taken = round((end-start), 4) 
+        # print(time_taken)
+        array=Float32MultiArray()
+        array.data=[self.visited_iterations * 1.0,time_taken]
+        # print(array.data)
+        self.iteration_publisher.publish(array)
+        
         self.deploy_marker()
         #print(self.grid)
 
@@ -82,7 +104,7 @@ class DFSPublisher(Node):
 
                 path.append((self.start_x, self.start_y))
                 
-                #print("path found and publsihing on topic")
+                # print("path found by dfs algorithm with length", len(path))
                 self.final_path=path
                 self.path_length=len(path)
                 return self.final_path    
@@ -94,9 +116,10 @@ class DFSPublisher(Node):
                 if self.is_valid(new_x, new_y) and (new_x, new_y) not in visited:
                     if self.grid[new_x][new_y]==0:
                         visited.append((new_x, new_y))
-                        parent[(new_x, new_y)] = (x, y)
-                        stack.append((new_x, new_y))
-        #print("path not found")
+                        if (new_x, new_y) not in parent.keys():
+                            parent[(new_x, new_y)] = (x, y)
+                            stack.append((new_x, new_y))
+        # print("path not found by dfs algorithm")
         return self.final_path
     
     
@@ -105,12 +128,12 @@ class DFSPublisher(Node):
         
         line_strip=Marker()
         points=Marker()
-        array=Int32MultiArray()
+        
         #print(self.final_path)
         
-        line_strip.header.frame_id = "/map_frame"
+        line_strip.header.frame_id = "/map"
         line_strip.header.stamp = DFSPublisher.get_clock(self).now().to_msg()
-        points.header.frame_id = "/map_frame"
+        points.header.frame_id = "/map"
         points.header.stamp = DFSPublisher.get_clock(self).now().to_msg()
 
         line_strip.ns = points.ns ="lines"
@@ -153,8 +176,7 @@ class DFSPublisher(Node):
             line_strip.points.append(geometry_msgs.msg.Point(x=self.final_path[i][1]*1.0, y=self.final_path[i][0]*1.0, z=0.0))
         #print(line_strip.points)
 
-        array.data=[self.visited_iterations,self.path_length]
-        self.iteration_publisher.publish(array)
+        
         self.dfs_publisher.publish(line_strip)
         self.dfs_publisher.publish(points)
 
@@ -163,7 +185,7 @@ class DFSPublisher(Node):
 def main(args=None):
     rclpy.init(args=args)
     dfs_publisher = DFSPublisher()
-    rclpy.spin_once(dfs_publisher)
+    rclpy.spin(dfs_publisher)
     dfs_publisher.destroy_node()
     rclpy.shutdown()
 
