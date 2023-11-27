@@ -39,7 +39,7 @@ Please follow given steps to successfully run the whole project. I tried using l
 
 Sr No | Command | Comment
 --- | --- | --- 
-1 | ros2 launch motion_planning launch.py | //To launch all (bfs, dfs, dijsktra and random) algorithm and grapg plotter
+1 | ros2 launch motion_planning launch.py | //To launch all (bfs, dfs, Dijkstra's and random) algorithm and grapg plotter
 --- | --- | --- 
 2 | ros2 run motion_planning grid --ros-args -p percent:=50 | //publish grid map
 
@@ -48,7 +48,7 @@ The perfromance anlysis is done on the basis of time complexity and space comple
 In time complexity time taken by each algorithm to plan a path is considered.
 In space complexity number of nodes visited before planning a path is considered.
 
-<img src="data/steps.jpeg" alt="Logo" width="1000" height="600">
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -56,17 +56,17 @@ In space complexity number of nodes visited before planning a path is considered
 <!-- USAGE EXAMPLES -->
 ## Performance graph and analysis:
 
-<img src="data/performance.png" alt="Logo" width="1000" height="600">
+<img src="data/performance.png" alt="Logo" width="1000" height="500">
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-Breadth First Search algorithm performed poorly when the obstacle percentage was less and shown good results when sapce became cluttered with obstacles. With increase in percenteage of obstacle the exploration of bfs decreases and the path is found in less time and less number of visited grids.
-Depth First Search algorithm performed realatively consistant with the environment obstacle percentage. but as seen in 2nd case, if the graph has cycles, dfs may take time to find a path or loop forever. 
-Dijkstra algorithm on other hand shown a good performance in the basis of time and space. Though in grids exploration, dijkstra was little expensive than the dfs algorithm but the problem of getting lost in loop is not seen in case of dijkstra. 
+Breadth First Search algorithm performed poorly when the obstacle percentage was less and shown good results when sapce became cluttered with obstacles. With increase in percenteage of obstacle the exploration of bfs decreases and the path is found in less time and less number of visited grids.<br>
+Depth First Search algorithm performed realatively consistant with the environment obstacle percentage. but as seen in 2nd case, if the graph has cycles, dfs may take time to find a path or loop forever. <br>
+Dijkstra algorithm on other hand shown a good performance in the basis of time and space. Though in grids exploration, dijkstra was little expensive than the dfs algorithm but the problem of getting lost in loop is not seen in case of dijkstra. <br>
 
 ## Conclusion:
 
-BFS:
+<strong>BFS</strong>:<br>
 Advantages:
 
     Optimal Solution: BFS guarantees finding the shortest path between two nodes in an unweighted graph.
@@ -79,7 +79,7 @@ Disadvantages:
     Space Complexity: Can be memory-intensive, especially for large graphs, due to the need to store all visited nodes in a queue.
     Time Complexity: Can be slow for graphs with a large number of nodes or edges.
 
-DFS: 
+<strong>DFS</strong>: <br>
 Advantages:
 
     Memory-Efficient: Uses less memory as it only requires the path from the root node to the current node.
@@ -92,7 +92,7 @@ Disadvantages:
     Non-Optimal Solution: May not find the shortest path in an unweighted graph, potentially finding a longer path first.
     Local Minimum: Can get stuck in a local minimum in a weighted graph.
 
-Dijsktra:
+<strong>Dijkstra's</strong>:<br>
 
 Advantages:
 
